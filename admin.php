@@ -10,35 +10,50 @@
     <script src="js/jquery-ui.js"></script>
 </head>
 <body>
-
 <div class="container-fluid">
-    <form method="post" enctype="multipart/form-data">
-        <label>
-            Title: <br/>
-            <input name="title" type="text"/>
-        </label>
-        <p>
-            <label>
-                Upload image: <br/>
-                <input name="img" type="file"/>
-            </label>
-        </p>
-        <label>Content: <br/>
-            <textarea id="content" name="content" rows="5" cols="20"></textarea>
-        </label>
-        <br/>
-        <button type="submit">Save</button>
-    </form>
-
-
-    <div class="container-fluid">
-        <ul id="navigation" class="nav nav-pills nav-stacked col-lg-2"></ul>
-        <div id="navigation_content" class="tab-content col-lg-10"></div>
+    <button class="btn btn-info btn-lg" type="button" data-toggle="modal" data-target="#add_post">Add New Post</button>
+    <div id="add_post" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button class="close" type="button" data-dismiss="modal">×</button>
+                    <h3 class="modal-title" style="text-align: center;">Add post</h3>
+                </div>
+                <div class="modal-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <label>
+                            Title: <br/>
+                            <input name="title" type="text"/>
+                        </label>
+                        <p>
+                            <label>
+                                Upload image: <br/>
+                                <input name="img" type="file"/>
+                            </label>
+                        </p>
+                        <label>Content: <br/>
+                            <textarea id="content" name="content" rows="5" cols="20"></textarea>
+                        </label>
+                        <br/>
+                        <button type="submit">Save</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <p>Previous posts:</p>
+
+    <!--    <div class="container-fluid">-->
+    <ul id="navigation" class="nav nav-pills nav-stacked col-lg-2"></ul>
+    <div id="navigation_content" class="tab-content col-lg-10"></div>
+    <!--    </div>-->
 
     <?php
     $db_path = "sqlite:db.sqlite";
-    //$db_path = "sqlite:/home/watcher/PhpstormProjects/blog/db.sqlite";
     $db = new PDO($db_path);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -114,35 +129,22 @@
 
                 var newContent = document.createElement('div');
                 newContent.setAttribute('id', 'post<?php echo $row['id']; ?>');
-                newContent.setAttribute('class', "tab-pane fade")
+                newContent.setAttribute('class', "tab-pane fade");
                 newContent.innerHTML = "<?php
                     echo "<article><header><h3>{$row['title']}</h3></header>";
-                    if ($row['image_src'] != "") {
+                    if ($row['image_src'] != "" && $row['image_src'] != NULL) {
                         echo "<img src='" . $row['image_src'] . "' width=200px/>";
                     }
-                    echo "<p>" . htmlentities($row['content'], ENT_QUOTES) . "</p>";
+                    $c = str_replace(array("\r\n", "\r", "\n"), "<br/>", htmlspecialchars($row['content'], ENT_QUOTES));
+                    echo "<p>" . $c . "</p>";
                     echo "<footer><span style='font-size: 12px'>Published at: {$row['published_date']}</span></footer></article>";
                     ?>";
                 navigation_content.appendChild(newContent);
             </script>
             <?php
-//            echo "<li>";
-//            echo "<article>";
-//            echo "<header>";
-//            echo "<h3>{$row['title']}</h3>";
-//            if ($row['image_src'] != "") {
-//                echo "<img src='" . $row['image_src'] . "' width=200px/>";
-//            }
-//            echo "</header>";
-//            echo "<div>{$row['content']}</div>";
-//            echo "<footer>";
-//            echo "<span style='font-size: 12px'>Published at: {$row['published_date']}</span>";
-//            echo "</footer>";
-//            echo "</article>";
         }
     } catch (PDOException $ex) {
         $db->rollBack();
-        // Обработка ошибок
         echo "<p style='color:red'>";
         echo $ex->getMessage();
         echo "</p>";
