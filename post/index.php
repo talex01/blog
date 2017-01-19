@@ -66,7 +66,7 @@
     <div class="row">
 
         <!-- Blog Post Content Column -->
-        <div class="col-lg-8">
+        <div id="post" class="col-lg-8">
 
             <!-- Blog Post -->
 
@@ -160,13 +160,14 @@
         </div>
 
         <!-- Blog Sidebar Widgets Column -->
-        <div class="col-md-4">
+        <div class="col-md-4 col-lg-4 sticky-block">
 
             <!-- Blog Search Well -->
-            <div class="well">
+            <div class="well inner">
                 <h4>Blog Search</h4>
                 <div class="input-group">
-                    <input type="text" class="form-control">
+                    <input id="search" type="text" class="form-control" onkeyup="FindOnPage();"
+                           placeholder="min 2 characters">
                     <span class="input-group-btn">
                             <button class="btn btn-default" type="button">
                                 <span class="glyphicon glyphicon-search"></span>
@@ -211,12 +212,12 @@
             <!-- Side Widget Well -->
             <div class="well">
                 <h4>Side Widget Well</h4>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore, perspiciatis adipisci accusamus
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Inventore, perspiciatis adipisci
+                    accusamus
                     laudantium odit aliquam repellat tempore quos aspernatur vero.</p>
             </div>
 
         </div>
-
     </div>
     <!-- /.row -->
 
@@ -240,6 +241,7 @@
 
 <!-- Bootstrap Core JavaScript -->
 <script src="js/bootstrap.min.js"></script>
+<script src="js/custom.js"></script>
 
 <?php
 $db_path = "sqlite:../db.sqlite";
@@ -253,19 +255,49 @@ if (isset($_GET['post'])) {
     $st->execute();
 }
 
-foreach ($st->fetchAll() as $row){
+foreach ($st->fetchAll() as $row) {
 //    echo $row['title'];
     $content = str_replace(array("\r\n", "\r", "\n"), "<br/>", htmlspecialchars($row['content'], ENT_QUOTES));
     $published_str = date('F d, Y', $row['published_date']) . " at " . date('g:i:s A', $row['published_date']);
 //echo $st['title'];
-?>
-<script>
-    document.getElementById('title').innerHTML = "<?php echo $row['title']; ?>";
-    document.getElementById('content').innerHTML = "<?php echo $content; ?>";
-    document.getElementById('date').innerHTML = "<?php echo $published_str; ?>";
-    document.getElementById('img').setAttribute('src', '../<?php echo $row['image_src']; ?>');
-</script>
+    ?>
+    <script>
+        document.getElementById('title').innerHTML = "<?php echo $row['title']; ?>";
+        document.getElementById('content').innerHTML = "<?php echo $content; ?>";
+        document.getElementById('date').innerHTML = "<?php echo $published_str; ?>";
+        document.getElementById('img').setAttribute('src', '../<?php echo $row['image_src']; ?>');
+    </script>
 <?php } ?>
+<script>
+    var lastResFind = ""; // последний удачный результат
+    var copy_page = ""; // копия страницы в исходном виде
+
+    function TrimStr(s) {
+        s = s.replace(/^\s+/g, '');
+        return s.replace(/\s+$/g, '');
+    }
+    function FindOnPage() {//ищет текст на странице
+        var obj = window.document.getElementById("search");
+        if (obj.value.length > 1) {
+            var textToFind;
+            if (obj) {
+                textToFind = TrimStr(obj.value);//обрезаем пробелы
+            }
+            if (copy_page.length > 0) {
+                document.getElementById("post").innerHTML = copy_page;
+            }
+            else {
+                copy_page = document.getElementById("post").innerHTML;
+            }
+
+            document.getElementById("post").innerHTML = document.getElementById("post").innerHTML.replace(eval("/name=" + lastResFind + "/gi"), " ");//стираем предыдущие якори для скрола
+            document.getElementById("post").innerHTML = document.getElementById("post").innerHTML.replace(eval("/" + textToFind + "/gi"), "<span style='background:#9d9d9d;'>" + textToFind + "</span>"); //Заменяем найденный текст ссылками с якорем;
+            lastResFind = textToFind; // сохраняем фразу для поиска, чтобы в дальнейшем по ней стереть все ссылки
+//        window.location = '#' + textToFind;//перемещаем скрол к последнему найденному совпадению
+            obj.setAttribute("value", textToFind);
+        }
+    }
+</script>
 </body>
 
 </html>
