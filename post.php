@@ -15,7 +15,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="css/blog-post.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -23,6 +23,13 @@
     <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/custom.js"></script>
 
 </head>
 
@@ -75,7 +82,7 @@
 
             <!-- Author -->
             <p class="lead">
-                by <a href="#">Alexey Trushenko</a>
+                by <a href="mailto:dd030984tas@gmail.com">Alexey Trushenko</a>
             </p>
 
             <hr>
@@ -227,7 +234,7 @@
     <footer>
         <div class="row">
             <div class="col-lg-12">
-                <p>Copyright &copy; Alexey Trushenko 2017</p>
+                <p>Copyright &copy; <a href="mailto:dd030984tas@gmail.com">Alexey Trushenko</a> 2017</p>
             </div>
         </div>
         <!-- /.row -->
@@ -236,15 +243,8 @@
 </div>
 <!-- /.container -->
 
-<!-- jQuery -->
-<script src="js/jquery.js"></script>
-
-<!-- Bootstrap Core JavaScript -->
-<script src="js/bootstrap.min.js"></script>
-<script src="js/custom.js"></script>
-
 <?php
-$db_path = "sqlite:../db.sqlite";
+$db_path = "sqlite:db.sqlite";
 $db = new PDO($db_path);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -265,7 +265,7 @@ foreach ($st->fetchAll() as $row) {
         document.getElementById('title').innerHTML = "<?php echo $row['title']; ?>";
         document.getElementById('content').innerHTML = "<?php echo $content; ?>";
         document.getElementById('date').innerHTML = "<?php echo $published_str; ?>";
-        document.getElementById('img').setAttribute('src', '../<?php echo $row['image_src']; ?>');
+        document.getElementById('img').setAttribute('src', '<?php echo $row['image_src']; ?>');
     </script>
 <?php } ?>
 <script>
@@ -292,8 +292,7 @@ foreach ($st->fetchAll() as $row) {
 
             document.getElementById("post").innerHTML = document.getElementById("post").innerHTML.replace(eval("/name=" + lastResFind + "/gi"), " ");//стираем предыдущие якори для скрола
             document.getElementById("post").innerHTML = document.getElementById("post").innerHTML.replace(eval("/" + textToFind + "/gi"), "<span style='background:#9d9d9d;'>" + textToFind + "</span>"); //Заменяем найденный текст ссылками с якорем;
-            lastResFind = textToFind; // сохраняем фразу для поиска, чтобы в дальнейшем по ней стереть все ссылки
-//        window.location = '#' + textToFind;//перемещаем скрол к последнему найденному совпадению
+            lastResFind = textToFind; // сохраняем фразу для поиска, чтобы в дальнейшем по ней вернуть старый контент
             obj.setAttribute("value", textToFind);
         }
     }
