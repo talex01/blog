@@ -102,26 +102,14 @@
                 } else {
                     $sql = "INSERT INTO post(title, content, published_date) values ('$title', '$content', '$pubdate')";
                 }
-
-//            echo "insert query: $sql<br/>";
-                $count = $db->exec($sql);
-                //throw new PDOException("Unknown exception");
+                $db->exec($sql);
             }
         }
         $db->commit();
 
-        if (empty($_GET)) {
-            //$sql = "SELECT * FROM post ORDER BY published_date DESC";
-            $st = $db->prepare("SELECT * FROM post ORDER BY published_date DESC");
-            $st->execute();
-        } else {
-            extract($_GET);
-            $st = $db->prepare("SELECT * FROM post WHERE title LIKE :filter");
-            $st->execute(['filter' => "%$filter%"]);
-        }
-//    echo "<pre>";
-//    echo "sql:" . $st->queryString;
-//    echo "</pre>";
+        $st = $db->prepare("SELECT * FROM post ORDER BY published_date DESC");
+        $st->execute();
+
         foreach ($st->fetchAll() as $row) {
             ?>
             <script>

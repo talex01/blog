@@ -15,7 +15,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="css/custom.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -34,6 +34,7 @@
 </head>
 
 <body>
+
 <!-- Navigation -->
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
@@ -85,10 +86,10 @@
             <!-- Pager -->
             <ul class="pager">
                 <li class="previous">
-                    <a href="#">&larr; Older</a>
+                    <a id="prev" href="#">&larr; Older</a>
                 </li>
                 <li class="next">
-                    <a href="#">Newer &rarr;</a>
+                    <a id="next" href="#">Newer &rarr;</a>
                 </li>
             </ul>
         </div>
@@ -179,22 +180,37 @@
 <!-- /.container -->
 
 <?php
+date_default_timezone_set("Europe/Helsinki");
+
+$num_rec_per_page = 3;
+
+// Connect database
 $db_path = "sqlite:db.sqlite";
 $db = new PDO($db_path);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-if (empty($_GET)) {
-//$sql = "SELECT * FROM post ORDER BY published_date DESC";
-    $st = $db->prepare("SELECT * FROM post ORDER BY published_date DESC");
+// Query
+// Определение количества строк в базе данных и расчет количества страниц. Эта конструкция должна работать быстрее.
+$total_rows = $db->query("SELECT COUNT(*) as count FROM post")->fetchColumn();
+$total_pages = ceil($total_rows / $num_rec_per_page);
+//echo "<h1>$total_rows $total_pages</h1>";
+
+isset($_GET["page"]) ? $page = $_GET["page"] : $page = 1;
+$start_from = ($page - 1) * $num_rec_per_page;
+$prev_page = implode(array($_SERVER['PHP_SELF'], "?page=", $page - 1));
+$next_page = implode(array($_SERVER['PHP_SELF'], "?page=", $page + 1));
+
+if (empty($_GET['search'])) {
+    $sql = "SELECT * FROM post ORDER BY published_date DESC LIMIT $start_from, $num_rec_per_page";
+    $st = $db->prepare($sql);
     $st->execute();
 } else {
     extract($_GET);
-    $st = $db->prepare("SELECT * FROM post WHERE title LIKE :filter ORDER BY published_date DESC ");
+    $st = $db->prepare("SELECT * FROM post WHERE title LIKE :filter ORDER BY published_date DESC LIMIT $start_from, $num_rec_per_page");
     $st->execute(['filter' => "%$search%"]);
 }
-//    echo "<pre>";
-//    echo "sql:" . $st->queryString;
-//    echo "</pre>";
+
+// Upload data from respond on page
 foreach ($st->fetchAll() as $row) {
     $published_str = date('F d, Y', $row['published_date']) . " at " . date('g:i:s A', $row['published_date']);
     ?>
@@ -202,15 +218,22 @@ foreach ($st->fetchAll() as $row) {
         var newContent = document.createElement('div');
         newContent.setAttribute('id', 'post<?php echo $row['id']; ?>');
         newContent.innerHTML = "<?php
-            echo "<h2><a href='#'>{$row['title']}</a></h2><p class='lead'> by <a href='mailto:dd030984tas@gmail.com'>Alexey Trushenko</a></p><p><span class='glyphicon glyphicon-time'></span> Posted on {$published_str}</p><hr>";
+            echo "<h2><a href='post.php?id=" . $row['id'] . "'>{$row['title']}</a></h2><p class='lead'> by <a href='mailto:dd030984tas@gmail.com'>Alexey Trushenko</a></p><p><span class='glyphicon glyphicon-time'></span> Posted on {$published_str}</p><hr>";
             if ($row['image_src'] != "" && $row['image_src'] != NULL) {
                 echo "<img class='img-responsive' src='" . $row['image_src'] . "' alt=''/>";
             }
             $c = substr(str_replace(array("\r\n", "\r", "\n"), "<br/>", htmlspecialchars($row['content'], ENT_QUOTES)), 0, 500);
-            echo "<hr><p>" . $c . " ...</p>";
-            echo "<a class='btn btn-primary' href='post.php?post=" . $row['id'] . "'>Read More <span class='glyphicon glyphicon-chevron-right'></span></a><hr>";
+            echo "<hr><p>" . $c . " <a href='post.php?id=" . $row['id'] . "'>...</a></p>";
+            echo "<a class='btn btn-primary' href='post.php?id=" . $row['id'] . "'>Read More <span class='glyphicon glyphicon-chevron-right'></span></a><hr>";
             ?>";
         content.appendChild(newContent);
+        if (<?php echo $page; ?> <= 1) {
+            document.getElementById("prev").setAttribute("href", "?page=1");
+        }
+//        if ($page >= $total_pages) $next_page = implode(array($_SERVER['PHP_SELF'], "?page=", $total_pages));
+
+        document.getElementById("prev").setAttribute("href", "<?php echo $prev_page; ?>");
+        document.getElementById("next").setAttribute("href", "<?php echo $next_page; ?>");
     </script>
 <?php } ?>
 </body>

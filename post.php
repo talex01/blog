@@ -15,7 +15,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <link href="css/custom.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -29,11 +29,13 @@
 
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
+
     <script src="js/custom.js"></script>
 
 </head>
 
 <body>
+
 <!-- Navigation -->
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
     <div class="container">
@@ -93,7 +95,7 @@
             <hr>
 
             <!-- Preview Image -->
-            <img id="img" class="img-responsive" src="http://placehold.it/900x300" alt="">
+            <img id="img" class="img-responsive" src="" alt="">
 
             <hr>
 
@@ -176,7 +178,7 @@
                     <input id="search" type="text" class="form-control" onkeyup="FindOnPage();"
                            placeholder="min 2 characters">
                     <span class="input-group-btn">
-                            <button class="btn btn-default" type="button">
+                            <button class="btn btn-default" type="button" disabled>
                                 <span class="glyphicon glyphicon-search"></span>
                         </button>
                         </span>
@@ -244,16 +246,16 @@
 <!-- /.container -->
 
 <?php
+date_default_timezone_set("Europe/Helsinki");
 $db_path = "sqlite:db.sqlite";
 $db = new PDO($db_path);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-if (isset($_GET['post'])) {
+if (isset($_GET['id'])) {
     extract($_GET);
-    $st = $db->prepare("SELECT * FROM post WHERE id=$post");
+    $st = $db->prepare("SELECT * FROM post WHERE id=$id");
 //    echo $st->queryString;
     $st->execute();
-}
+
 
 foreach ($st->fetchAll() as $row) {
 //    echo $row['title'];
@@ -267,7 +269,7 @@ foreach ($st->fetchAll() as $row) {
         document.getElementById('date').innerHTML = "<?php echo $published_str; ?>";
         document.getElementById('img').setAttribute('src', '<?php echo $row['image_src']; ?>');
     </script>
-<?php } ?>
+<?php }} ?>
 <script>
     var lastResFind = ""; // последний удачный результат
     var copy_page = ""; // копия страницы в исходном виде
