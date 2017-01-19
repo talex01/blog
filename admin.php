@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>BLOG</title>
+    <title>BLOG ADMIN</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/bootstrap.min.css">
@@ -32,7 +32,7 @@
                             </label>
                         </p>
                         <label>Content: <br/>
-                            <textarea id="content" name="content" rows="5" cols="20"></textarea>
+                            <textarea id="content" name="content" rows="5" cols="60"></textarea>
                         </label>
                         <br/>
                         <button type="submit">Save</button>
@@ -53,6 +53,7 @@
     <!--    </div>-->
 
     <?php
+    date_default_timezone_set("Europe/Helsinki");
     $db_path = "sqlite:db.sqlite";
     $db = new PDO($db_path);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -70,7 +71,7 @@
                     echo 'Загружена только часть файла';
                     break;
                 case 4:
-                    echo 'Файл не загружен';
+//                    echo 'Файл не загружен';
                     break;
             }
         } else {
@@ -94,7 +95,8 @@
 //                var_dump($_POST);
 //                echo "</pre>";
                 $title = htmlentities($title, ENT_QUOTES);
-                $pubdate = date('F d, Y') . " at " . date('g:i:s A');
+//                $pubdate = date('F d, Y') . " at " . date('g:i:s A');
+                $pubdate = time();
                 if (isset($source)) {
                     $sql = "INSERT INTO post(title, content, published_date, image_src) values ('$title', '$content', '$pubdate', '$dest')";
                 } else {
@@ -124,7 +126,8 @@
             ?>
             <script>
                 var newLi = document.createElement('li');
-                newLi.innerHTML = "<a data-toggle='tab' href='#post<?php echo $row['id']; ?>'><?php echo $row['published_date']; ?></a>";
+                <?php $published_str = date('F d, Y', $row['published_date']) . " at " . date('g:i:s A', $row['published_date']); ?>
+                newLi.innerHTML = "<a data-toggle='tab' href='#post<?php echo $row['id']; ?>'><?php echo $published_str; ?><br><?php echo $row['title']; ?></a>";
                 navigation.appendChild(newLi);
 
                 var newContent = document.createElement('div');
@@ -137,7 +140,7 @@
                     }
                     $c = str_replace(array("\r\n", "\r", "\n"), "<br/>", htmlspecialchars($row['content'], ENT_QUOTES));
                     echo "<p>" . $c . "</p>";
-                    echo "<footer><span style='font-size: 12px'>Published at: {$row['published_date']}</span></footer></article>";
+                    echo "<footer><span style='font-size: 12px'>Published at: {$published_str}</span></footer></article>";
                     ?>";
                 navigation_content.appendChild(newContent);
             </script>
