@@ -205,8 +205,9 @@
 
 <?php
 date_default_timezone_set("Europe/Helsinki");
-$db_path = "sqlite:db.sqlite";
-$db = new PDO($db_path);
+//$db_path = "sqlite:db.sqlite";
+//$db = new PDO($db_path);
+$db = new PDO('mysql:host=localhost;dbname=blog', 'blog', 'blog');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 if (isset($_GET['id'])) {

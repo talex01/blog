@@ -185,8 +185,9 @@ date_default_timezone_set("Europe/Helsinki");
 $num_rec_per_page = 3;
 
 // Connect database
-$db_path = "sqlite:db.sqlite";
-$db = new PDO($db_path);
+//$db_path = "sqlite:db.sqlite";
+//$db = new PDO($db_path);
+$db = new PDO('mysql:host=localhost;dbname=blog', 'blog', 'blog');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 // Query
