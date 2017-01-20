@@ -109,9 +109,9 @@
             <!-- Comments Form -->
             <div class="well">
                 <h4>Leave a Comment:</h4>
-                <form role="form">
+                <form role="form" method="post">
                     <div class="form-group">
-                        <textarea class="form-control" rows="3"></textarea>
+                        <textarea name="comment_content" class="form-control" rows="3"></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                 </form>
@@ -122,49 +122,7 @@
             <!-- Posted Comments -->
 
             <!-- Comment -->
-            <div class="media">
-                <a class="pull-left" href="#">
-                    <img class="media-object" src="http://placehold.it/64x64" alt="">
-                </a>
-                <div class="media-body">
-                    <h4 class="media-heading">Start Bootstrap
-                        <small>August 25, 2014 at 9:30 PM</small>
-                    </h4>
-                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo.
-                    Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi
-                    vulputate fringilla. Donec lacinia congue felis in faucibus.
-                </div>
-            </div>
-
-            <!-- Comment -->
-            <div class="media">
-                <a class="pull-left" href="#">
-                    <img class="media-object" src="http://placehold.it/64x64" alt="">
-                </a>
-                <div class="media-body">
-                    <h4 class="media-heading">Start Bootstrap
-                        <small>August 25, 2014 at 9:30 PM</small>
-                    </h4>
-                    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo.
-                    Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi
-                    vulputate fringilla. Donec lacinia congue felis in faucibus.
-                    <!-- Nested Comment -->
-                    <div class="media">
-                        <a class="pull-left" href="#">
-                            <img class="media-object" src="http://placehold.it/64x64" alt="">
-                        </a>
-                        <div class="media-body">
-                            <h4 class="media-heading">Nested Start Bootstrap
-                                <small>August 25, 2014 at 9:30 PM</small>
-                            </h4>
-                            Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin
-                            commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce
-                            condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                        </div>
-                    </div>
-                    <!-- End Nested Comment -->
-                </div>
-            </div>
+            <div id="comment"></div>
 
         </div>
 
@@ -250,27 +208,60 @@ date_default_timezone_set("Europe/Helsinki");
 $db_path = "sqlite:db.sqlite";
 $db = new PDO($db_path);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 if (isset($_GET['id'])) {
     extract($_GET);
-    $st = $db->prepare("SELECT * FROM post WHERE id=$id");
-//    echo $st->queryString;
-    $st->execute();
+    $st = $db->prepare("SELECT * FROM post WHERE id= :filter");
+    $st->execute(['filter' => "$id"]);
 
+    foreach ($st->fetchAll() as $row) {
+        $content = str_replace(array("\r\n", "\r", "\n"), "<br/>", htmlspecialchars($row['content'], ENT_QUOTES));
+        $published_str = date('F d, Y', $row['published_date']) . " at " . date('g:i:s A', $row['published_date']);
+        ?>
+        <script>
+            document.getElementById('title').innerHTML = "<?php echo $row['title']; ?>";
+            document.getElementById('content').innerHTML = "<?php echo $content; ?>";
+            document.getElementById('date').innerHTML = "<?php echo $published_str; ?>";
+            document.getElementById('img').setAttribute('src', '<?php echo $row['image_src']; ?>');
+        </script>
+    <?php }
+    // Post comment
+    try {
+        $db->beginTransaction();
+        if (isset($_POST['comment_content'])) {
+            extract($_POST);
+            $post_time = time();
+            $st = $db->prepare("INSERT INTO comments(post_id, content, published_date) values (:id, :filter, '$post_time')");
+            $st->execute(['id' => "$id", 'filter' => "$comment_content"]);
+        }
+        $db->commit();
+    } catch (PDOException $exception) {
+        $db->rollBack();
+        echo "<p style='color:red'>";
+        echo $exception->getMessage();
+        echo "</p>";
+    }
+    // Output comments
+    $st = $db->prepare("SELECT * FROM comments WHERE post_id= :filter ORDER BY published_date DESC");
+    $st->execute(['filter' => "$id"]);
 
-foreach ($st->fetchAll() as $row) {
-//    echo $row['title'];
+    foreach ($st->fetchAll() as $row) {
     $content = str_replace(array("\r\n", "\r", "\n"), "<br/>", htmlspecialchars($row['content'], ENT_QUOTES));
     $published_str = date('F d, Y', $row['published_date']) . " at " . date('g:i:s A', $row['published_date']);
-//echo $st['title'];
     ?>
     <script>
-        document.getElementById('title').innerHTML = "<?php echo $row['title']; ?>";
-        document.getElementById('content').innerHTML = "<?php echo $content; ?>";
-        document.getElementById('date').innerHTML = "<?php echo $published_str; ?>";
-        document.getElementById('img').setAttribute('src', '<?php echo $row['image_src']; ?>');
+        var newComment = document.createElement('div');
+        newComment.setAttribute('class', 'media');
+        newComment.innerHTML = "<?php
+            $c = str_replace(array("\r\n", "\r", "\n"), "<br/>", htmlspecialchars($row['content'], ENT_QUOTES));
+            echo "<a class='pull-left' href='#'><img class='media-object' src='img/man.png' width='64px' height='64px' alt=''></a><div class='media-body'><h4 class='media-heading'>Anonymous<small>{$published_str}</small></h4>";
+            echo "<p>" . $c . "</p></div>";
+            ?>";
+        comment.appendChild(newComment);
     </script>
 <?php }} ?>
 <script>
+    // поиск
     var lastResFind = ""; // последний удачный результат
     var copy_page = ""; // копия страницы в исходном виде
 
@@ -292,8 +283,8 @@ foreach ($st->fetchAll() as $row) {
                 copy_page = document.getElementById("post").innerHTML;
             }
 
-            document.getElementById("post").innerHTML = document.getElementById("post").innerHTML.replace(eval("/name=" + lastResFind + "/gi"), " ");//стираем предыдущие якори для скрола
-            document.getElementById("post").innerHTML = document.getElementById("post").innerHTML.replace(eval("/" + textToFind + "/gi"), "<span style='background:#9d9d9d;'>" + textToFind + "</span>"); //Заменяем найденный текст ссылками с якорем;
+            document.getElementById("post").innerHTML = document.getElementById("post").innerHTML.replace(eval("/name=" + lastResFind + "/gi"), " ");//стираем предыдущие результаты поиска
+            document.getElementById("post").innerHTML = document.getElementById("post").innerHTML.replace(eval("/" + textToFind + "/gi"), "<span style='background:#9d9d9d;'>" + textToFind + "</span>"); //Заменяем найденный текст span'ами со своими стилями
             lastResFind = textToFind; // сохраняем фразу для поиска, чтобы в дальнейшем по ней вернуть старый контент
             obj.setAttribute("value", textToFind);
         }

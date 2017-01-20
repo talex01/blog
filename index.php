@@ -193,7 +193,6 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 // Определение количества строк в базе данных и расчет количества страниц. Эта конструкция должна работать быстрее.
 $total_rows = $db->query("SELECT COUNT(*) as count FROM post")->fetchColumn();
 $total_pages = ceil($total_rows / $num_rec_per_page);
-//echo "<h1>$total_rows $total_pages</h1>";
 
 isset($_GET["page"]) ? $page = $_GET["page"] : $page = 1;
 $start_from = ($page - 1) * $num_rec_per_page;
@@ -210,7 +209,7 @@ if (empty($_GET['search'])) {
     $st->execute(['filter' => "%$search%"]);
 }
 
-// Upload data from respond on page
+// Upload data from respond to page
 foreach ($st->fetchAll() as $row) {
     $published_str = date('F d, Y', $row['published_date']) . " at " . date('g:i:s A', $row['published_date']);
     ?>
@@ -227,13 +226,19 @@ foreach ($st->fetchAll() as $row) {
             echo "<a class='btn btn-primary' href='post.php?id=" . $row['id'] . "'>Read More <span class='glyphicon glyphicon-chevron-right'></span></a><hr>";
             ?>";
         content.appendChild(newContent);
-        if (<?php echo $page; ?> <= 1) {
-            document.getElementById("prev").setAttribute("href", "?page=1");
-        }
-//        if ($page >= $total_pages) $next_page = implode(array($_SERVER['PHP_SELF'], "?page=", $total_pages));
 
-        document.getElementById("prev").setAttribute("href", "<?php echo $prev_page; ?>");
-        document.getElementById("next").setAttribute("href", "<?php echo $next_page; ?>");
+        // Создаем ссылки только на существующие страницы
+        <?php
+        if ($page <= 1) {
+            $prev_page = implode(array($_SERVER['PHP_SELF'], "?page=1"));
+        }
+        if ($page >= $total_pages) {
+            $next_page = implode(array($_SERVER['PHP_SELF'], "?page=$total_pages"));
+        }
+        ?>
+
+        document.getElementById("prev").setAttribute("href", "<?php echo $next_page; ?>");
+        document.getElementById("next").setAttribute("href", "<?php echo $prev_page; ?>");
     </script>
 <?php } ?>
 </body>

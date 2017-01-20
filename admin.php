@@ -91,11 +91,7 @@
         if (!empty($_POST)) {
             if ($_POST['title'] != "") {
                 extract($_POST);
-//                echo "<pre>";
-//                var_dump($_POST);
-//                echo "</pre>";
                 $title = htmlentities($title, ENT_QUOTES);
-//                $pubdate = date('F d, Y') . " at " . date('g:i:s A');
                 $pubdate = time();
                 if (isset($source)) {
                     $sql = "INSERT INTO post(title, content, published_date, image_src) values ('$title', '$content', '$pubdate', '$dest')";
