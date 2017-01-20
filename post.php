@@ -131,10 +131,10 @@
 
             <!-- Blog Search Well -->
             <div class="well inner">
-                <h4>Blog Search</h4>
+                <h4>Search on contents of blog</h4>
                 <div class="input-group">
                     <input id="search" type="text" class="form-control" onkeyup="FindOnPage();"
-                           placeholder="min 2 characters">
+                           placeholder="min 3 characters">
                     <span class="input-group-btn">
                             <button class="btn btn-default" type="button" disabled>
                                 <span class="glyphicon glyphicon-search"></span>
@@ -254,7 +254,7 @@ if (isset($_GET['id'])) {
         newComment.setAttribute('class', 'media');
         newComment.innerHTML = "<?php
             $c = str_replace(array("\r\n", "\r", "\n"), "<br/>", htmlspecialchars($row['content'], ENT_QUOTES));
-            echo "<a class='pull-left' href='#'><img class='media-object' src='img/man.png' width='64px' height='64px' alt=''></a><div class='media-body'><h4 class='media-heading'>Anonymous<small>{$published_str}</small></h4>";
+            echo "<a class='pull-left' href='#'><img class='media-object' src='img/man.png' width='64px' height='64px' alt=''></a><div class='media-body'><h4 class='media-heading'>Anonymous <small>{$published_str}</small></h4>";
             echo "<p>" . $c . "</p></div>";
             ?>";
         comment.appendChild(newComment);
@@ -271,20 +271,20 @@ if (isset($_GET['id'])) {
     }
     function FindOnPage() {//ищет текст на странице
         var obj = window.document.getElementById("search");
-        if (obj.value.length > 1) {
+        if (obj.value.length > 2) {
             var textToFind;
             if (obj) {
                 textToFind = TrimStr(obj.value);//обрезаем пробелы
             }
             if (copy_page.length > 0) {
-                document.getElementById("post").innerHTML = copy_page;
+                document.getElementById("content").innerHTML = copy_page;
             }
             else {
-                copy_page = document.getElementById("post").innerHTML;
+                copy_page = document.getElementById("content").innerHTML;
             }
-
-            document.getElementById("post").innerHTML = document.getElementById("post").innerHTML.replace(eval("/name=" + lastResFind + "/gi"), " ");//стираем предыдущие результаты поиска
-            document.getElementById("post").innerHTML = document.getElementById("post").innerHTML.replace(eval("/" + textToFind + "/gi"), "<span style='background:#9d9d9d;'>" + textToFind + "</span>"); //Заменяем найденный текст span'ами со своими стилями
+            var dest = document.getElementById("content");
+            dest.innerHTML = dest.innerHTML.replace(eval("/name=" + lastResFind + "/gi"), " ");//стираем предыдущие результаты поиска
+            dest.innerHTML = dest.innerHTML.replace(eval("/" + textToFind + "/gi"), "<span style='background:#9d9d9d;'>" + textToFind + "</span>"); //Заменяем найденный текст span'ами со своими стилями
             lastResFind = textToFind; // сохраняем фразу для поиска, чтобы в дальнейшем по ней вернуть старый контент
             obj.setAttribute("value", textToFind);
         }

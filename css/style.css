@@ -31,3 +31,7 @@ a:hover {
     /*border-width: 1px 0;*/
     /*margin: 18px 0;*/
 /*}*/
+
+textarea{
+    resize: none;
+}
